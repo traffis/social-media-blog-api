@@ -19,7 +19,10 @@ public class AccountDAO {
             ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
             if (pkeyResultSet.next()) {
                 int generated_account_id = (int) pkeyResultSet.getInt(1);
-                return new Account(generated_account_id, account.getUsername(), account.getPassword());
+                String username = account.getUsername();
+                String password = account.getPassword();
+
+                return new Account(generated_account_id, username, password);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -37,9 +40,10 @@ public class AccountDAO {
 
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()) {
-                Account account = new Account(rs.getInt("account_id"), rs.getString("username"),
-                    rs.getString("password"));
-                return account;
+                int accountId = rs.getInt("account_id");
+                String password = rs.getString("password");
+
+                return new Account(accountId, username, password);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -47,19 +51,20 @@ public class AccountDAO {
         return null;
     }
 
-    public Account getAccountByID(int id) {
+    public Account getAccountById(int accountId) {
         Connection connection = ConnectionUtil.getConnection();
 
         try {
             String sql = "SELECT * FROM account WHERE account_id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, id);
+            preparedStatement.setInt(1, accountId);
 
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()) {
-                Account account = new Account(rs.getInt("account_id"), rs.getString("username"),
-                    rs.getString("password"));
-                return account;
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+
+                return new Account(accountId, username, password);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -78,9 +83,11 @@ public class AccountDAO {
 
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()) {
-                Account verifiedLogin = new Account(rs.getInt("account_id"), rs.getString("username"),
-                    rs.getString("password"));
-                return verifiedLogin;
+                int accountId = rs.getInt("account_id");
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+
+                return new Account(accountId, username, password);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());

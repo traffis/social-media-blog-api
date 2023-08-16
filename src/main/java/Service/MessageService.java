@@ -2,30 +2,28 @@ package Service;
 
 import Model.Message;
 import DAO.MessageDAO;
-import Model.Account;
-import DAO.AccountDAO;
 
 import java.util.List;
 
 public class MessageService {
     private MessageDAO messageDAO;
-    private AccountDAO accountDAO;
+    private AccountService accountService;
 
     public MessageService() {
         this.messageDAO = new MessageDAO();
-        this.accountDAO = new AccountDAO();
+        this.accountService = new AccountService();
     }
 
     public MessageService(MessageDAO messageDAO) {
         this.messageDAO = messageDAO;
     }
 
-    public MessageService(MessageDAO messageDAO, AccountDAO accountDAO) {
+    public MessageService(MessageDAO messageDAO, AccountService accountService) {
         this.messageDAO = messageDAO;
-        this.accountDAO = accountDAO;
+        this.accountService = accountService;
     }
 
-    public boolean messageCheck(String messageText) {
+    public boolean isValidMessage(String messageText) {
         int messageLength = messageText.length();
 
         if (messageLength < 1 || messageLength >= 255) {
@@ -34,12 +32,22 @@ public class MessageService {
         return true;
     }
 
+    public boolean isExistingMessageId(int messageId) {
+        Message existingMessageId = getMessageById(messageId);
+
+        if (existingMessageId == null) {
+            return false;
+        }
+        return true;
+    }
+
     public Message addMessage(Message message) {
         String messageText = message.getMessage_text();
-        int posterID = message.getPosted_by();
-        Account existingUser = accountDAO.getAccountByID(posterID);
+        boolean validMessage = isValidMessage(messageText);
+        int accountId = message.getPosted_by();
+        boolean existingUser = accountService.isExistingUser(accountId);
 
-        if (messageCheck(messageText) && existingUser != null) {
+        if (validMessage && existingUser) {
             return messageDAO.addMessage(message);
         }
         return null;
@@ -49,24 +57,25 @@ public class MessageService {
         return messageDAO.getAllMessages();
     }
 
-    public Message getMessageByID(int messageID) {
-        return messageDAO.getMessageByID(messageID);
+    public Message getMessageById(int messageId) {
+        return messageDAO.getMessageById(messageId);
     }
 
-    public Message deleteMessageByID(int messageID) {
-        return messageDAO.deleteMessageByID(messageID);
+    public Message deleteMessageById(int messageId) {
+        return messageDAO.deleteMessageById(messageId);
     }
 
-    public Message updateMessageByID(int messageID, String messageText) {
-        Message existingMessageID = getMessageByID(messageID);
+    public Message updateMessageById(int messageId, String messageText) {
+        boolean existingMessageId = isExistingMessageId(messageId);
+        boolean validMessage = isValidMessage(messageText);
 
-        if (messageCheck(messageText) && existingMessageID != null) {
-            return messageDAO.updateMessageByID(messageID, messageText);
+        if (validMessage && existingMessageId) {
+            return messageDAO.updateMessageById(messageId, messageText);
         }
         return null;
     }
 
-    public List<Message> getAllMessagesFromUser(int userID) {
-        return messageDAO.getAllMessagesFromUser(userID);
+    public List<Message> getAllMessagesFromUser(int accountId) {
+        return messageDAO.getAllMessagesFromUser(accountId);
     }
 }

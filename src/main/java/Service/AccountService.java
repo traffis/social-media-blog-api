@@ -14,29 +14,44 @@ public class AccountService {
         this.accountDAO = accountDAO;
     }
 
-    public boolean usernameCheck(String username) {
-        // check if username meets requirements
+    public boolean isValidUsername(String username) {
         if (username.length() < 1) {
             return false;
         }
         return true;
     }
 
-    public boolean passwordCheck(String password) {
-        // check if password meets requirements
+    public boolean isValidPassword(String password) {
         if (password.length() < 4) {
             return false;
         }
         return true;
     }
 
-    public Account addAccount(Account account) {
-        boolean validUsername = usernameCheck(account.getUsername());
-        boolean validPassword = passwordCheck(account.getPassword());
-        Account duplicateUsername = getAccountByUsername(account.getUsername());
+    public boolean isDuplicateUsername(String username) {
+        Account duplicateUsername = getAccountByUsername(username);
 
-        // check for username and password requirement, and duplicate username
-        if (validUsername && validPassword && duplicateUsername == null) {
+        if (duplicateUsername == null) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isExistingUser(int accountId) {
+        Account existingUser = accountDAO.getAccountById(accountId);
+
+        if (existingUser == null) {
+            return false;
+        }
+        return true;
+    }
+
+    public Account addAccount(Account account) {
+        boolean validUsername = isValidUsername(account.getUsername());
+        boolean validPassword = isValidPassword(account.getPassword());
+        boolean duplicateUsername = isDuplicateUsername(account.getUsername());
+
+        if (validUsername && validPassword && !duplicateUsername) {
             return accountDAO.addAccount(account);
         }
         return null;
@@ -50,7 +65,7 @@ public class AccountService {
         return accountDAO.getAccountByUsername(username);
     }
 
-    public Account getAccountByID(int id) {
-        return accountDAO.getAccountByID(id);
+    public Account getAccountById(int accountId) {
+        return accountDAO.getAccountById(accountId);
     }
 }
